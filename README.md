@@ -20,7 +20,6 @@ Dự án "FlowerShop" là một ứng dụng web thương mại điện tử chu
 
 ## 📋 Mục lục
 
-- [Mô tả dự án](#-mô-tả-dự-án)
 - [Tính năng chính](#-tính-năng-chính)
 - [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
 - [Yêu cầu hệ thống](#-yêu-cầu-hệ-thống)
