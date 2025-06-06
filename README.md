@@ -3,7 +3,9 @@
 **Laravel Application Project**
 
 **Họ và tên sinh viên:** Nguyễn Xuân Mạnh
+
 **Mã Sinh viên:** 23010045
+
 **Tên đề tài:** FlowerShop
 
 ## 📋 Mô tả dự án
