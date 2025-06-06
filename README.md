@@ -20,16 +20,18 @@ Dự án "FlowerShop" là một ứng dụng web thương mại điện tử chu
 
 ## 📋 Mục lục
 
-- [Giới thiệu](#giới-thiệu)
-- [Tính năng chính](#tính-năng-chính)
-- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
-- [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
-- [Hướng dẫn cài đặt](#hướng-dẫn-cài-đặt)
-- [Cấu trúc dự án](#cấu-trúc-dự-án)
-- [Sử dụng](#sử-dụng)
-- [API Endpoints](#api-endpoints)
-- [Đóng góp](#đóng-góp)
-- [Giấy phép](#giấy-phép)
+- [Mô tả dự án](#-mô-tả-dự-án)
+- [Tính năng chính](#-tính-năng-chính)
+- [Công nghệ sử dụng](#-công-nghệ-sử-dụng)
+- [Yêu cầu hệ thống](#-yêu-cầu-hệ-thống)
+- [Hướng dẫn cài đặt](#-hướng-dẫn-cài-đặt)
+- [Cấu trúc dự án](#-cấu-trúc-dự-án)
+- [Sử dụng](#-sử-dụng)
+- [API Endpoints chính](#-api-endpoints-chính)
+- [Testing](#-testing)
+- [Tính năng nâng cao](#-tính-năng-nâng-cao)
+- [Đóng góp](#-đóng-góp)
+- [Ghi chú phát triển](#-ghi-chú-phát-triển)
 
 
 ## ✨ Tính năng chính
