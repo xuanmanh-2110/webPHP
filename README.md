@@ -305,5 +305,3 @@ php artisan view:clear
 - `order_items` - Chi tiết đơn hàng
 
 ---
-
-⭐ **Nếu dự án này hữu ích, hãy star cho repository!** ⭐
