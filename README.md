@@ -275,6 +275,8 @@ php artisan test
 
 ## 📝 Ghi chú phát triển
 
+- Tương lai sẽ phát triển thêm!
+
 ### Lệnh hữu ích
 ```bash
 # Tạo controller mới
