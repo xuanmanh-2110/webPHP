@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\OrderItem;
 
 class OrderController extends Controller
 {
@@ -13,7 +14,7 @@ class OrderController extends Controller
     {
         $this->middleware('auth');
         $this->middleware(function ($request, $next) {
-            $adminRoutes = ['index', 'create', 'store', 'destroy', 'cancel'];
+            $adminRoutes = ['index', 'create', 'store', 'destroy', 'updateStatus'];
             $action = $request->route()->getActionMethod();
 
             if (in_array($action, $adminRoutes) && auth()->check() && !auth()->user()->is_admin) {
@@ -23,9 +24,28 @@ class OrderController extends Controller
         });
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with('customer', 'items.product')->orderByDesc('created_at')->paginate(10);
+        $query = Order::with('customer', 'items.product');
+
+        // Lọc theo trạng thái
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Lọc theo khoảng thời gian
+        if ($request->filled('from')) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+        if ($request->filled('to')) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $orders = $query->orderByDesc('created_at')->paginate(10);
+        
+        // Giữ lại các tham số filter khi phân trang
+        $orders->appends($request->only(['status', 'from', 'to']));
+
         return view('orders.index', compact('orders'));
     }
     public function create()
@@ -45,7 +65,7 @@ public function store(Request $request)
 
     $order = Order::create([
         'customer_id' => $request->customer_id,
-        'total_price' => 0, // sẽ tính sau
+        'total_amount' => 0, // sẽ tính sau
     ]);
 
     $total = 0;
@@ -63,13 +83,25 @@ public function store(Request $request)
         ]);
     }
 
-    $order->update(['total_price' => $total]);
+    $order->update(['total_amount' => $total]);
 
     return redirect()->route('orders.index')->with('success', 'Đã tạo đơn hàng.');
 }
+
+public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:pending,processing,shipped,delivered,cancelled'
+    ]);
+
+    $order = Order::findOrFail($id);
+    $order->update(['status' => $request->status]);
+
+    return redirect()->back()->with('success', 'Đã cập nhật trạng thái đơn hàng.');
+}
 public function show($id)
 {
-    $order = Order::findOrFail($id);
+    $order = Order::with('customer', 'items.product')->findOrFail($id);
     return view('orders.show', compact('order'));
 }
 // Lịch sử mua hàng cho khách hàng

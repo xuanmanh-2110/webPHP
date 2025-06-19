@@ -5,9 +5,10 @@
     <h2 class="text-3xl font-bold text-rose-600 mb-6 text-center">Chi tiết đơn hàng #{{ $order->id }}</h2>
     <div class="bg-white p-6 rounded-lg shadow-sm">
         <p class="mb-2"><strong class="font-semibold text-gray-800">Khách hàng:</strong> {{ $order->customer->name ?? 'N/A' }}</p>
-        <p class="mb-2"><strong class="font-semibold text-gray-800">Địa chỉ giao hàng:</strong> {{ $order->address ?? 'N/A' }}</p>
+        <p class="mb-2"><strong class="font-semibold text-gray-800">Email:</strong> {{ $order->customer->email ?? 'N/A' }}</p>
         <p class="mb-2"><strong class="font-semibold text-gray-800">Số điện thoại:</strong> {{ $order->phone ?? 'N/A' }}</p>
-        <p class="mb-4"><strong class="font-semibold text-gray-800">Ngày đặt:</strong> {{ $order->created_at->format('d/m/Y H:i') }}</p>
+        <p class="mb-2"><strong class="font-semibold text-gray-800">Địa chỉ giao hàng:</strong> {{ $order->address ?? 'N/A' }}</p>
+        <p class="mb-4"><strong class="font-semibold text-gray-800">Ngày đặt:</strong> {{ $order->formatted_created_at }}</p>
         <h4 class="text-xl font-semibold text-gray-800 mb-4">Sản phẩm</h4>
         <div class="overflow-x-auto mb-4">
             <table class="min-w-full divide-y divide-gray-200">
@@ -61,12 +62,78 @@
         </button>
     </a>
     @if(($order->status ?? 'pending') === 'pending' || ($order->status ?? 'pending') === 'processing')
-    <form action="{{ route('orders.cancel', $order->id) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng này?');" class="w-full sm:w-auto">
+    <form id="cancel-order-form" action="{{ route('orders.cancel', $order->id) }}" method="POST" class="w-full sm:w-auto">
         @csrf
-        <button type="submit" class="w-full px-8 py-3 bg-red-500 hover:bg-red-600 text-white border-none rounded-md text-lg cursor-pointer transition-colors duration-200">
+        <button type="button" id="cancel-order-btn" class="w-full px-8 py-3 bg-red-500 hover:bg-red-600 text-white border-none rounded-md text-lg cursor-pointer transition-colors duration-200">
             Hủy đơn hàng
         </button>
     </form>
     @endif
 </div>
+
+<!-- Modal xác nhận hủy đơn hàng -->
+<div id="confirm-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 hidden">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-200">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-rose-100 rounded-full">
+                <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Xác nhận hủy đơn hàng</h3>
+            <p class="text-gray-600 text-center mb-6">Bạn có chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác.</p>
+            <div class="flex space-x-3">
+                <button id="confirm-cancel" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                    Hủy
+                </button>
+                <button id="confirm-delete" class="flex-1 px-4 py-2 bg-rose-600 text-white font-semibold rounded-lg hover:bg-rose-700 transition-colors duration-200">
+                    Hủy đơn hàng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cancelBtn = document.getElementById('cancel-order-btn');
+    const modal = document.getElementById('confirm-modal');
+    const confirmBtn = document.getElementById('confirm-delete');
+    const cancelModalBtn = document.getElementById('confirm-cancel');
+    const form = document.getElementById('cancel-order-form');
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            showModal();
+        });
+    }
+    
+    function showModal() {
+        modal.classList.remove('hidden');
+        
+        // Xử lý khi nhấn Hủy
+        const handleCancel = () => {
+            modal.classList.add('hidden');
+            confirmBtn.removeEventListener('click', handleConfirm);
+            cancelModalBtn.removeEventListener('click', handleCancel);
+        };
+        
+        // Xử lý khi nhấn Hủy đơn hàng
+        const handleConfirm = () => {
+            modal.classList.add('hidden');
+            if (form) {
+                form.submit();
+            }
+            confirmBtn.removeEventListener('click', handleConfirm);
+            cancelModalBtn.removeEventListener('click', handleCancel);
+        };
+        
+        // Thêm event listeners
+        confirmBtn.addEventListener('click', handleConfirm);
+        cancelModalBtn.addEventListener('click', handleCancel);
+    }
+});
+</script>
+
 @endsection

@@ -55,11 +55,26 @@
         <button type="submit" class="w-full bg-rose-500 text-white font-bold py-3 px-4 rounded-lg text-lg transition-colors duration-200 mb-4 hover:bg-rose-600">Thanh toán sản phẩm đã chọn</button>
     </form>
 
-    <div id="toast-notification" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-gray-800 px-5 py-3 rounded-lg shadow-lg z-50 hidden transition-opacity duration-300 ease-out opacity-0 border border-gray-200">
-        <p class="text-base font-semibold mb-2 text-center">Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?</p>
-        <div class="flex justify-center gap-2 mt-2">
-            <button id="toast-cancel-btn" class="px-3 py-1.5 bg-white text-gray-800 rounded-md text-xs hover:bg-gray-100 border border-gray-300 transition-colors duration-200">Hủy</button>
-            <button id="toast-confirm-btn" class="px-3 py-1.5 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors duration-200">Xóa</button>
+    <!-- Modal xác nhận xóa sản phẩm khỏi giỏ hàng -->
+    <div id="confirm-modal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 border border-gray-200">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-rose-100 rounded-full">
+                    <svg class="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Xác nhận xóa sản phẩm</h3>
+                <p class="text-gray-600 text-center mb-6">Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?</p>
+                <div class="flex space-x-3">
+                    <button id="confirm-cancel" class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition-colors duration-200">
+                        Hủy
+                    </button>
+                    <button id="confirm-delete" class="flex-1 px-4 py-2 bg-rose-600 text-white font-semibold rounded-lg hover:bg-rose-700 transition-colors duration-200">
+                        Xóa
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -72,22 +87,17 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const toastNotification = document.getElementById('toast-notification');
-            const toastConfirmBtn = document.getElementById('toast-confirm-btn');
-            const toastCancelBtn = document.getElementById('toast-cancel-btn');
+            const modal = document.getElementById('confirm-modal');
+            const confirmBtn = document.getElementById('confirm-delete');
+            const cancelBtn = document.getElementById('confirm-cancel');
             let currentProductIdToDelete = null;
 
-            function showToast() {
-                toastNotification.classList.remove('hidden', 'opacity-0');
-                toastNotification.classList.add('opacity-100');
+            function showModal() {
+                modal.classList.remove('hidden');
             }
 
-            function hideToast() {
-                toastNotification.classList.remove('opacity-100');
-                toastNotification.classList.add('opacity-0');
-                setTimeout(() => {
-                    toastNotification.classList.add('hidden');
-                }, 300); // Match transition duration
+            function hideModal() {
+                modal.classList.add('hidden');
             }
 
             document.querySelectorAll('.quantity-input').forEach(input => {
@@ -123,12 +133,21 @@
             document.querySelectorAll('.remove-item-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     currentProductIdToDelete = this.dataset.id;
-                    showToast();
+                    showModal();
                 });
             });
 
-            toastConfirmBtn.addEventListener('click', function() {
-                hideToast();
+            // Xử lý khi nhấn Hủy
+            const handleCancel = () => {
+                hideModal();
+                currentProductIdToDelete = null;
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            // Xử lý khi nhấn Xóa
+            const handleConfirm = () => {
+                hideModal();
                 if (currentProductIdToDelete) {
                     fetch(`/cart/remove/${currentProductIdToDelete}`, {
                         method: 'POST',
@@ -161,11 +180,20 @@
                         alert('Đã xảy ra lỗi khi xóa sản phẩm.');
                     });
                 }
-            });
+                confirmBtn.removeEventListener('click', handleConfirm);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
 
-            toastCancelBtn.addEventListener('click', function() {
-                hideToast();
-                currentProductIdToDelete = null;
+            // Event listener để hiển thị modal khi nhấn nút xóa
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item-btn')) {
+                    currentProductIdToDelete = e.target.dataset.id;
+                    showModal();
+                    
+                    // Thêm event listeners cho modal
+                    confirmBtn.addEventListener('click', handleConfirm);
+                    cancelBtn.addEventListener('click', handleCancel);
+                }
             });
         });
     </script>

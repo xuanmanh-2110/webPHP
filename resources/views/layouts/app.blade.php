@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'FlowerShop')</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     {{-- Vite managed assets: app.css (with Tailwind) and app.js --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])

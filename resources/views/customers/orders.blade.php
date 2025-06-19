@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<button onclick="window.history.back()" class="mt-4 mb-3 px-4 py-2 bg-rose-100 text-rose-600 border-none rounded-md text-base cursor-pointer hover:bg-rose-200 transition-colors duration-200">
+<button onclick="window.history.back()" class="inline-block bg-rose-100 hover:bg-rose-200 text-rose-600 font-bold py-2 px-4 rounded-md shadow-md transition-colors duration-200 mb-4 ml-4">
   ← Quay lại trang trước
 </button>
 <div class="container mx-auto p-6">

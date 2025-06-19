@@ -7,6 +7,22 @@ use App\Models\Product;
 
 class CartController extends Controller
 {
+    /**
+     * Tính giá thực tế của sản phẩm (có giảm giá cho 5 sản phẩm mới nhất chỉ khi mua 1 sản phẩm)
+     */
+    private function getActualPrice($product, $quantity = 1)
+    {
+        // Lấy 5 sản phẩm mới nhất
+        $latestProductIds = Product::latest()->take(5)->pluck('id')->toArray();
+        $isLatestProduct = in_array($product->id, $latestProductIds);
+        
+        // Chỉ giảm giá khi là latest product VÀ số lượng = 1
+        if ($isLatestProduct && $quantity == 1) {
+            return $product->price * 0.8; // Giảm 20%
+        }
+        
+        return $product->price; // Giá gốc
+    }
     public function index(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -21,18 +37,34 @@ class CartController extends Controller
     {
         $product = Product::findOrFail($id);
         $cart = session()->get('cart', []);
+        $quantity = $request->input('quantity', 1);
 
         if (isset($cart[$id])) {
-            $cart[$id]['quantity']++;
+            // Nếu sản phẩm đã có trong giỏ, cập nhật số lượng và tính lại giá
+            $newQuantity = $cart[$id]['quantity'] + $quantity;
+            $actualPrice = $this->getActualPrice($product, $newQuantity);
+            $cart[$id]['quantity'] = $newQuantity;
+            $cart[$id]['price'] = $actualPrice;
         } else {
+            // Nếu sản phẩm chưa có trong giỏ, thêm mới
+            $actualPrice = $this->getActualPrice($product, $quantity);
             $cart[$id] = [
                 "name" => $product->name,
-                "price" => $product->price,
-                "quantity" => 1
+                "price" => $actualPrice,
+                "quantity" => $quantity
             ];
         }
 
         session()->put('cart', $cart);
+        
+        // Kiểm tra nếu request là AJAX thì trả về JSON
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã thêm ' . $quantity . ' sản phẩm vào giỏ hàng!'
+            ]);
+        }
+        
         return redirect()->route('cart.index')->with('success', 'Đã thêm sản phẩm vào giỏ hàng!');
     }
 
@@ -44,7 +76,13 @@ class CartController extends Controller
 
         $cart = session()->get('cart', []);
         if (isset($cart[$id])) {
-            $cart[$id]['quantity'] = $request->quantity;
+            // Tìm sản phẩm và tính lại giá dựa trên số lượng mới
+            $product = Product::findOrFail($id);
+            $newQuantity = $request->quantity;
+            $actualPrice = $this->getActualPrice($product, $newQuantity);
+            
+            $cart[$id]['quantity'] = $newQuantity;
+            $cart[$id]['price'] = $actualPrice;
             session()->put('cart', $cart);
 
             $itemTotal = $cart[$id]['price'] * $cart[$id]['quantity'];
@@ -94,23 +132,25 @@ class CartController extends Controller
         }
         return redirect()->route('checkout.show', ['selected' => implode(',', $selected)]);
     }
-public function buyNow(Request $request, $product)
+    public function buyNow(Request $request, $product)
     {
         $product = \App\Models\Product::findOrFail($product);
-        $cart = session()->get('cart', []);
-
-        if (isset($cart[$product->id])) {
-            $cart[$product->id]['quantity']++;
-        } else {
-            $cart[$product->id] = [
+        $quantity = $request->input('quantity', 1);
+        $actualPrice = $this->getActualPrice($product, $quantity);
+        
+        // Tạo một cart riêng biệt cho "Mua ngay" mà không ảnh hưởng đến cart hiện tại
+        $buyNowCart = [
+            $product->id => [
                 "name" => $product->name,
-                "price" => $product->price,
-                "quantity" => 1
-            ];
-        }
-
-        session()->put('cart', $cart);
-        // Chuyển hướng đến trang đặt hàng (checkout)
-        return redirect()->route('checkout.show')->with('success', 'Đã thêm sản phẩm vào giỏ hàng, vui lòng hoàn tất đơn hàng!');
+                "price" => $actualPrice,
+                "quantity" => $quantity
+            ]
+        ];
+        
+        // Lưu cart "Mua ngay" vào session riêng biệt
+        session()->put('buy_now_cart', $buyNowCart);
+        
+        // Chuyển hướng đến trang thanh toán với flag buy_now
+        return redirect()->route('checkout.show', ['buy_now' => true]);
     }
 }

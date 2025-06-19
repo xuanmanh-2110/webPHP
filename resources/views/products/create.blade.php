@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<button onclick="window.history.back()" class="mt-4 mb-3 px-4 py-2 bg-rose-100 text-rose-600 border-none rounded-md text-base cursor-pointer hover:bg-rose-200 transition-colors duration-200">
+<button onclick="window.history.back()" class="inline-block bg-rose-100 hover:bg-rose-200 text-rose-600 font-bold py-2 px-4 rounded-md shadow-md transition-colors duration-200 mb-4 ml-4">
   ← Quay lại trang trước
 </button>
 <div class="container mx-auto p-6">
@@ -34,15 +34,6 @@
             <input type="number" step="0.01" name="price" id="price" value="{{ old('price') }}" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50" required>
         </div>
 
-        <div class="mb-4">
-            <label for="stock" class="block text-gray-700 text-sm font-medium mb-1">Tồn kho:</label>
-            <input type="number" name="stock" id="stock" value="{{ old('stock', 0) }}" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50" required>
-        </div>
-
-        <div class="mb-4">
-            <label for="category" class="block text-gray-700 text-sm font-medium mb-1">Loại:</label>
-            <input type="text" name="category" id="category" value="{{ old('category') }}" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring focus:ring-rose-200 focus:ring-opacity-50">
-        </div>
 
         <div class="mb-4">
             <label for="image" class="block text-gray-700 text-sm font-medium mb-1">Ảnh:</label>
